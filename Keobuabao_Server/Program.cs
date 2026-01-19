@@ -32,8 +32,8 @@ namespace Keobuabao_Server
         {
             try
             {
-                SendMessage(p1, "ĐÃ GHÉP ĐỐI! Sẵn sàng chơi nhiều ván.\n");
-                SendMessage(p2, "ĐÃ GHÉP ĐỐI! Sẵn sàng chơi nhiều ván.\n");
+                SendMessage(p1, "ĐÃ GHÉP ĐÔI! Sẵn sàng chơi nhiều ván.\n");
+                SendMessage(p2, "ĐÃ GHÉP ĐÔI! Sẵn sàng chơi nhiều ván.\n");
 
                 while (true)
                 {
@@ -49,9 +49,9 @@ namespace Keobuabao_Server
                     {
                         SendMessage(p2, "Đối thủ đã thoát!\n");
                         p2.Close();
-                        return;
+                        break;
                     }
-                    SendMessage(p2, "Đối thủ đã chọn... Đang chờ bạn\n");
+                    
 
                     // Nhận lựa chọn từ player 2
                     choice2 = ReceiveChoice(p2);
@@ -59,11 +59,13 @@ namespace Keobuabao_Server
                     {
                         SendMessage(p1, "Đối thủ đã thoát!\n");
                         p1.Close();
-                        return;
+                        break;
                     }
-                    SendMessage(p1, "Đối thủ đã chọn... Tính kết quả\n");
-                   
-                    
+
+
+                    SendMessage(p1, "Doi thu chon:" + choice2);
+                    SendMessage(p2, "Doi thu chon:" + choice1);
+
                     // Tính kết quả
                     string result1 = CalculateResult(choice1, choice2);
                     string result2 = CalculateResult(choice2, choice1);

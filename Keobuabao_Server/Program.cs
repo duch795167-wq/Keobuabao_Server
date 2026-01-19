@@ -24,12 +24,6 @@ namespace Keobuabao_Server
                 TcpClient player2 = server.AcceptTcpClient();
                 SendMessage(player2, "Đang chờ đối thủ...\n");
 
-                Console.WriteLine("Đã ghép đôi 2 người chơi!");
-
-                // Gửi thông báo bắt đầu cho cả 2
-                SendMessage(player1, "BẮT ĐẦU! Chọn: 1=Kéo, 2=Búa, 3=Bao\n");
-                SendMessage(player2, "BẮT ĐẦU! Chọn: 1=Kéo, 2=Búa, 3=Bao\n");
-
                 // Xử lý trong thread riêng
                 new Thread(() => HandleGame(player1, player2)).Start();
             }
@@ -38,37 +32,105 @@ namespace Keobuabao_Server
         {
             try
             {
-                string choice1 = "";
-                string choice2 = "";
+                SendMessage(p1, "ĐÃ GHÉP ĐỐI! Sẵn sàng chơi nhiều ván.\n");
+                SendMessage(p2, "ĐÃ GHÉP ĐỐI! Sẵn sàng chơi nhiều ván.\n");
 
-                // Nhận lựa chọn từ player 1
-                choice1 = ReceiveChoice(p1);
-                SendMessage(p2, "Đối thủ đã chọn... Đang chờ bạn\n");
+                while (true)
+                {
+                    // Gửi thông báo bắt đầu cho cả 2
+                    SendMessage(p1, "BẮT ĐẦU! Chọn: 1=Kéo, 2=Búa, 3=Bao\n");
+                    SendMessage(p2, "BẮT ĐẦU! Chọn: 1=Kéo, 2=Búa, 3=Bao\n");
+                    string choice1 = "";
+                    string choice2 = "";
 
-                // Nhận lựa chọn từ player 2
-                choice2 = ReceiveChoice(p2);
-                SendMessage(p1, "Đối thủ đã chọn... Tính kết quả\n");
+                    // Nhận lựa chọn từ player 1
+                    choice1 = ReceiveChoice(p1);
+                    if (choice1 == null)
+                    {
+                        SendMessage(p2, "Đối thủ đã thoát!\n");
+                        p2.Close();
+                        return;
+                    }
+                    SendMessage(p2, "Đối thủ đã chọn... Đang chờ bạn\n");
 
-                // Tính kết quả
-                string result1 = CalculateResult(choice1, choice2);
-                string result2 = CalculateResult(choice2, choice1);
-                // Gửi kết quả cho cả hai
-                SendMessage(p1, $"\nKẾT QUẢ:\nBạn: {ToName(choice1)} - Đối thủ: {ToName(choice2)}\n{result1}\n");
-                SendMessage(p2, $"\nKẾT QUẢ:\nBạn: {ToName(choice2)} - Đối thủ: {ToName(choice1)}\n{result2}\n");
+                    // Nhận lựa chọn từ player 2
+                    choice2 = ReceiveChoice(p2);
+                    if (choice2 == null)
+                    {
+                        SendMessage(p1, "Đối thủ đã thoát!\n");
+                        p1.Close();
+                        return;
+                    }
+                    SendMessage(p1, "Đối thủ đã chọn... Tính kết quả\n");
+                   
+                    
+                    // Tính kết quả
+                    string result1 = CalculateResult(choice1, choice2);
+                    string result2 = CalculateResult(choice2, choice1);
+                    // Gửi kết quả cho cả hai
+                    SendMessage(p1, $"\nKẾT QUẢ:\nBạn: {ToName(choice1)} - Đối thủ: {ToName(choice2)}\n{result1}\n");
+                    SendMessage(p2, $"\nKẾT QUẢ:\nBạn: {ToName(choice2)} - Đối thủ: {ToName(choice1)}\n{result2}\n");
 
-                // Đóng kết nối (hoặc có thể cho chơi tiếp)
+                    SendMessage(p1, "Gửi Y để chơi tiếp, bất kỳ phím nào để thoát\n");
+                    SendMessage(p2, "Gửi Y để chơi tiếp, bất kỳ phím nào để thoát\n");
+
+                    string? again1 = ReceiveAgain(p1);
+                    string? again2 = ReceiveAgain(p2);
+                    if (again1?.ToUpper() != "Y" || again2?.ToUpper() != "Y")
+                    {
+                        SendMessage(p1, "Kết thúc trò chơi!\n");
+                        SendMessage(p2, "Kết thúc trò chơi!\n");
+                        break;
+                    }
+                    // Đóng kết nối (hoặc có thể cho chơi tiếp)
+                    
+                }
+            }
+            catch { }
+            finally
+            {
                 p1.Close();
                 p2.Close();
             }
-            catch { }
         }
 
         static string ReceiveChoice(TcpClient client)
         {
-            NetworkStream stream = client.GetStream();
-            byte[] buffer = new byte[1024];
-            int bytesRead = stream.Read(buffer, 0, buffer.Length);
-            return Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+            try
+            {
+                NetworkStream stream = client.GetStream();
+                byte[] buffer = new byte[1024];
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+
+                if (bytesRead == 0)
+                    return null;
+
+                string choice = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                return (choice == "1" || choice == "2" || choice == "3") ? choice : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        static string ReceiveAgain(TcpClient client)
+        {
+            try
+            {
+                NetworkStream stream = client.GetStream();
+                byte[] buffer = new byte[1024];
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
+
+                if (bytesRead == 0)
+                    return null;
+
+                string choiceAgain = Encoding.UTF8.GetString(buffer, 0, bytesRead).Trim();
+                return (choiceAgain == "Y" || choiceAgain == "N") ? choiceAgain : null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         static void SendMessage(TcpClient client, string msg)
@@ -98,8 +160,8 @@ namespace Keobuabao_Server
         {
             switch (choice)
             {
-                case "1": return "Kéo ✊";
-                case "2": return "Búa ✌️";
+                case "1": return "Kéo ✌️";
+                case "2": return "Búa ✊";
                 case "3": return "Bao ✋";
                 default: return "???";
             }

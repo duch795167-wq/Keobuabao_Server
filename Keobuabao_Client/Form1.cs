@@ -18,7 +18,7 @@ namespace Keobuabao_Client
             btnBua.Visible = false;
             btnBao.Visible = false;
         }
-        
+
 
         private void ReceiveMessages()
         {
@@ -55,15 +55,20 @@ namespace Keobuabao_Client
             {
                 byte[] data = Encoding.UTF8.GetBytes(choice);
                 stream.Write(data, 0, data.Length);
-
-                // Ẩn nút sau khi chọn
-                this.Invoke((MethodInvoker)delegate
+                if(choice != "Y"|| choice != "N")
                 {
-                    btnKeo.Visible = false;
-                    btnBua.Visible = false;
-                    btnBao.Visible = false;
-                    txtStatus.AppendText("Đã gửi lựa chọn... Đang chờ kết quả\n");
-                });
+
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        btnKeo.Visible = false;
+                        btnBua.Visible = false;
+                        btnBao.Visible = false;
+                        txtStatus.AppendText("Đã gửi lựa chọn... Đang chờ kết quả\n");
+                    });
+
+                }
+                // Ẩn nút sau khi chọn
+                
             }
             catch { }
         }
@@ -103,5 +108,16 @@ namespace Keobuabao_Client
                 MessageBox.Show("Không kết nối được server!\n" + ex.Message);
             }
         }
+
+        private void btnPlayAgain_Click(object sender, EventArgs e)
+        {
+            SendChoice("Y");
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            SendChoice("N");
+        }
+        
     }
 }

@@ -16,6 +16,8 @@ namespace Keobuabao_Client
         
         public Form1()
         {
+
+
             InitializeComponent();
             btnKeo.Visible = false;
             btnBua.Visible = false;

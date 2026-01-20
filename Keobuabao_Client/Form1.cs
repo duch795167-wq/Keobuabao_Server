@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing.Drawing2D;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -165,10 +166,16 @@ namespace Keobuabao_Client
 
         private void btnConnect_Click(object sender, EventArgs e)
         {
+            string ip = string.IsNullOrEmpty(txtIP.Text) ? "127.0.0.1" : txtIP.Text.Trim();
 
+            if (!IsLocalhost127_0_0_X(ip))
+            {
+                MessageBox.Show("Chỉ được kết nối đến địa chỉ 127.0.0.x (localhost)!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             try
             {
-                string ip = string.IsNullOrEmpty(txtIP.Text) ? "127.0.0.1" : txtIP.Text;
+                
                 client = new TcpClient(ip, 8888);
                 stream = client.GetStream();
 
@@ -193,6 +200,13 @@ namespace Keobuabao_Client
             SendChoice("Y");
         }
 
+
+        private bool IsLocalhost127_0_0_X(string ip)
+        {
+            if (!IPAddress.TryParse(ip, out IPAddress address)) return false;
+            byte[] bytes = address.GetAddressBytes();
+            return bytes[0] == 127 && bytes[1] == 0 && bytes[2] == 0;
+        }
         private void btnExit_Click(object sender, EventArgs e)
         {
             SendChoice("N");

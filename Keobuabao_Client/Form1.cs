@@ -39,7 +39,7 @@ namespace Keobuabao_Client
             try
             {
                 byte[] buffer = new byte[1024];
-                int dem = 0;
+                
                 while (true)
                 {
                     int bytesRead = stream.Read(buffer, 0, buffer.Length);
@@ -89,7 +89,7 @@ namespace Keobuabao_Client
                         }
                         
                     });
-                    dem++;
+                    
                 }
             }
             catch { }

@@ -12,14 +12,22 @@ namespace Keobuabao_Client
         private TcpClient client;
         private NetworkStream stream;
         private Thread receiveThread;
-        public string choice_You;
+        
         public Form1()
         {
             InitializeComponent();
             btnKeo.Visible = false;
             btnBua.Visible = false;
             btnBao.Visible = false;
+            btnPlayAgain.Visible = false;
+            btnExit.Visible = false;
             lbl_Result.Visible = false;
+            lbl_VS.Visible = false;
+            pic_Enemy.Visible = false;
+            pic_You.Visible = false;
+            lbl_You.Visible = false;
+            lbl_Enemy.Visible = false;
+
             MakeCircleButton(btnKeo);
             MakeCircleButton(btnBua);
             MakeCircleButton(btnBao);
@@ -31,22 +39,28 @@ namespace Keobuabao_Client
             try
             {
                 byte[] buffer = new byte[1024];
+                int dem = 0;
                 while (true)
                 {
                     int bytesRead = stream.Read(buffer, 0, buffer.Length);
                     if (bytesRead == 0) break;
-
+                    
                     string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-
                     this.Invoke((MethodInvoker)delegate
                     {
-                        if (message.StartsWith("Doi thu chon:"))
+                        if (message.StartsWith("Ket qua la:"))
                         {
-                            string choice_Enemy = message.Split(':')[1].Trim();
-                            ShowEnemyChoice(choice_Enemy);
+                            string result = message.Split(':')[1].Trim();
                             lbl_Result.Visible = true;
-                            
-                            lbl_Result.Text = ShowResult(choice_You,choice_Enemy);
+                            btnPlayAgain.Visible = true;
+                            btnExit.Visible = true;
+                            lbl_Result.Text = result;
+                            txtStatus.AppendText("-" + message + Environment.NewLine);
+                        }
+                        else if (message.StartsWith("Doi thu chon:"))
+                        {
+                            string Enemy_choice = message.Split(':')[1].Trim();
+                            ShowEnemyChoice(Enemy_choice);
                         }
                         else
                         {
@@ -58,17 +72,24 @@ namespace Keobuabao_Client
                         if (message.Contains("BẮT ĐẦU"))
                         {
                             txtStatus.Clear();
-                            txtStatus.AppendText("-" + message + Environment.NewLine);
+                            txtStatus.AppendText("-" + message + Environment.NewLine);   
                             lbl_Result.Visible = false;
+                            pic_You.Visible = true;
+                            pic_Enemy.Visible = true;
+                            pic_Background.Visible = false;
                             pic_Enemy.Image = null;
                             pic_You.Image = null;
                             btnKeo.Visible = true;
                             btnBua.Visible = true;
                             btnBao.Visible = true;
-                            
+
+                            btnPlayAgain.Visible = false;
+                            btnExit.Visible = false;
+
                         }
                         
                     });
+                    dem++;
                 }
             }
             catch { }
@@ -87,9 +108,23 @@ namespace Keobuabao_Client
                     btnKeo.Visible = false;
                     btnBua.Visible = false;
                     btnBao.Visible = false;
-                    if (choice != "N")
-                        txtStatus.AppendText("Đã gửi lựa chọn... Đang chờ kết quả" + Environment.NewLine);
-                    else txtStatus.AppendText(Environment.NewLine + "Ban da thoat");
+                    if (choice == "N") {
+                        txtStatus.AppendText("Ban da thoat");
+                        btnKeo.Visible = false;
+                        btnBua.Visible = false;
+                        btnBao.Visible = false;
+                        btnPlayAgain.Visible = false;
+                        btnExit.Enabled = false;
+                        lbl_Result.Visible = false;
+                        pic_Enemy.Visible = false;
+                        pic_You.Visible = false;
+
+                    } 
+                    else if(choice == "Y") txtStatus.AppendText("Dang doi doi thu");
+                    else txtStatus.AppendText("Đã gửi lựa chọn... Đang chờ kết quả" + Environment.NewLine);
+
+                        
+                    
                 });
 
 
@@ -105,21 +140,21 @@ namespace Keobuabao_Client
             
             SendChoice("1");
             pic_You.Image = Properties.Resources.Keo;
-            choice_You = "1";
+          
 
         }
         private void btnBua_Click(object sender, EventArgs e)
         {
             SendChoice("2");
             pic_You.Image = Properties.Resources.Bua;
-            choice_You = "2";
+            
         }
         private void btnBao_Click(object sender, EventArgs e)
         {
 
             SendChoice("3");
             pic_You.Image = Properties.Resources.Bao;
-            choice_You = "3";
+           
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -187,17 +222,6 @@ namespace Keobuabao_Client
                     pic_Enemy.Image = Properties.Resources.Bao;
                     break;
             }
-        }
-        string ShowResult(string c1, string c2)
-        {
-            if (c1 == c2) return "HÒA!";
-
-            if ((c1 == "1" && c2 == "3") ||    // Kéo thắng Bao
-                (c1 == "2" && c2 == "1") ||    // Búa thắng Kéo
-                (c1 == "3" && c2 == "2"))      // Bao thắng Búa
-                return "Bạn THẮNG! 🎉";
-
-            return "Bạn THUA! 😢";
         }
     }
 }

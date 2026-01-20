@@ -38,8 +38,9 @@ namespace Keobuabao_Server
                 while (true)
                 {
                     // Gửi thông báo bắt đầu cho cả 2
-                    SendMessage(p1, "BẮT ĐẦU! Chọn: 1=Kéo, 2=Búa, 3=Bao\n");
-                    SendMessage(p2, "BẮT ĐẦU! Chọn: 1=Kéo, 2=Búa, 3=Bao\n");
+                    SendMessage(p1, "BẮT ĐẦU! Chọn: Kéo, Búa, Bao\n");
+                    Thread.Sleep(100);
+                    SendMessage(p2, "BẮT ĐẦU! Chọn: Kéo, Búa, Bao\n");
                     string choice1 = "";
                     string choice2 = "";
 
@@ -61,20 +62,19 @@ namespace Keobuabao_Server
                         p1.Close();
                         break;
                     }
+                    SendMessage(p1, "Doi thu chon:" + choice2 + "\n");
+                    SendMessage(p2, "Doi thu chon:" + choice1 + "\n");
 
 
-                    SendMessage(p1, "Doi thu chon:" + choice2);
-                    SendMessage(p2, "Doi thu chon:" + choice1);
 
                     // Tính kết quả
                     string result1 = CalculateResult(choice1, choice2);
                     string result2 = CalculateResult(choice2, choice1);
-                    // Gửi kết quả cho cả hai
-                    SendMessage(p1, $"\nKẾT QUẢ:\nBạn: {ToName(choice1)} - Đối thủ: {ToName(choice2)}\n{result1}\n");
-                    SendMessage(p2, $"\nKẾT QUẢ:\nBạn: {ToName(choice2)} - Đối thủ: {ToName(choice1)}\n{result2}\n");
+                    SendMessage(p1, "Ket qua la:" + result1 + "\n");
+                    SendMessage(p2, "Ket qua la:" + result2 + "\n");
 
-                    SendMessage(p1, "Gửi Y để chơi tiếp, bất kỳ phím nào để thoát\n");
-                    SendMessage(p2, "Gửi Y để chơi tiếp, bất kỳ phím nào để thoát\n");
+                    SendMessage(p1, "Nhan choi lai de tiep tuc\n");
+                    SendMessage(p2, "Nhan choi lai de tiep tuc\n");
 
                     string? again1 = ReceiveAgain(p1);
                     string? again2 = ReceiveAgain(p2);
